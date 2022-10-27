@@ -1,0 +1,6 @@
+module Pods_StructureTreeApp {
+  umbrella header "Pods-StructureTreeApp-umbrella.h"
+
+  export *
+  module * { export * }
+}
