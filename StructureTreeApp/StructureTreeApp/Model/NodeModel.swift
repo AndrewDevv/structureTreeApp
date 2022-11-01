@@ -9,12 +9,12 @@
 import Foundation
 
 
-struct RootNodeModel {
+struct RootNodeModel: Codable {
     var name: String
     var childNodeList: [ChildNode?]
 }
 
-struct ChildNode {
+struct ChildNode: Codable {
     var name: String
     var childs: [ChildNode?]
 }

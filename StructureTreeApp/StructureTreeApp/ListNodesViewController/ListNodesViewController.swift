@@ -13,19 +13,20 @@ class ListNodesViewController: UIViewController {
     // MARK: properties
     
     private let nodeTableView = UITableView()
-    private var nodes = RootNodeModel(name: "Root Node", childNodeList: [])
+    private var nodeModel = RootNodeModel(name: "Root Node", childNodeList: [])
     
     // MARK: lyfecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        navigationItem.title = nodes.name
+        navigationItem.title = nodeModel.name
         
         setupView()
         setupConstraint()
         setupTableView()
         addNavBarItem()
+        getData(forKey: "Node", castTo: RootNodeModel.self)
     }
 
     // MARK: setupView
@@ -71,7 +72,8 @@ class ListNodesViewController: UIViewController {
             guard let self = self else { return }
             
             let text = aletController.textFields?[0].text
-            self.nodes.childNodeList.append(ChildNode(name: text!, childs: []))
+            self.nodeModel.childNodeList.append(ChildNode(name: text!, childs: []))
+            self.saveData(object: self.nodeModel, forKey: "Node")
             self.nodeTableView.reloadData()
         }
         let cancelButton = UIAlertAction(title: "cancel", style: .cancel, handler: nil)
@@ -81,26 +83,48 @@ class ListNodesViewController: UIViewController {
         
         present(aletController, animated: true, completion: nil)
     }
-
+    
+    // MARK: get/set data
+    
+    private func saveData(object: RootNodeModel, forKey: String) {
+        let userDefaults = UserDefaults.standard
+        do {
+            try userDefaults.setObject(object, forKey: forKey)
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+    
+    private func getData(forKey: String, castTo: RootNodeModel.Type) {
+        let userDefaults = UserDefaults.standard
+        do {
+            let data = try userDefaults.getObject(forKey: forKey, castTo: castTo.self)
+            nodeModel = data
+            print(data)
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
 }
 
 // MARK: UITableViewDataSource
 
 extension ListNodesViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return nodes.childNodeList.count
+        return nodeModel.childNodeList.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = nodeTableView.dequeueReusableCell(withIdentifier: String(describing: ListNodesTableViewCell.self)) as! ListNodesTableViewCell
-        cell.configure(name: nodes.childNodeList[indexPath.row]?.name ?? "")
+        cell.configure(name: nodeModel.childNodeList[indexPath.row]?.name ?? "")
         return cell
     }
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            nodes.childNodeList.remove(at: indexPath.row)
+            nodeModel.childNodeList.remove(at: indexPath.row)
             nodeTableView.deleteRows(at: [indexPath], with: .automatic)
+            saveData(object: nodeModel, forKey: "Node")
             nodeTableView.reloadData()
         }
     }
