@@ -9,12 +9,7 @@
 import Foundation
 
 
-struct RootNodeModel: Codable {
+struct NodeModel: Codable {
     var name: String
-    var childNodeList: [ChildNode?]
-}
-
-struct ChildNode: Codable {
-    var name: String
-    var childs: [ChildNode?]
+    var childNodeList: [NodeModel]?
 }
