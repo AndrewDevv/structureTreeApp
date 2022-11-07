@@ -7,10 +7,11 @@
 //
 
 import Foundation
+import RxSwift
 
 protocol ObjectSavable {
-    func setObject<Object>(_ object: Object, forKey: String) throws where Object: Encodable
-    func getObject<Object>(forKey: String, castTo type: Object.Type) throws -> Object where Object: Decodable
+    func setObject<Object: Encodable>(_ object: [Object], forKey: String) throws -> Observable<Void>
+    func getObject<Object: Decodable>(forKey: String, castTo type: Object.Type) throws -> Observable<Object>
 }
 
 enum ObjectSavableError: String, LocalizedError {
@@ -20,25 +21,29 @@ enum ObjectSavableError: String, LocalizedError {
 }
 
 extension UserDefaults: ObjectSavable {
-    func setObject<Object>(_ object: Object, forKey: String) throws where Object : Encodable {
-        let encoder = JSONEncoder()
-        do {
-            let data = try encoder.encode(object)
-            set(data, forKey: forKey)
-        } catch {
-            throw ObjectSavableError.unableToEncode
+    func setObject<Object: Encodable>(_ object: [Object], forKey: String) -> Observable<Void> {
+        return Observable.create { observer in
+            if let data = try? JSONEncoder().encode(object) {
+                self.set(data, forKey: forKey)
+                observer.onNext(Void())
+                observer.onCompleted()
+            } else {
+                observer.onError(ObjectSavableError.unableToEncode)
+            }
+            return Disposables.create()
         }
     }
     
-    func getObject<Object>(forKey: String, castTo type: Object.Type) throws -> Object where Object : Decodable {
-        guard let data = data(forKey: forKey) else { throw ObjectSavableError.noValue }
-        
-        let decoder = JSONDecoder()
-        do {
-            let object = try decoder.decode(type, from: data)
-            return object
-        } catch {
-            throw ObjectSavableError.unableToDecode
+    func getObject<Object: Decodable>(forKey: String, castTo type: Object.Type) -> Observable<Object> {
+        return Observable.create { observer in
+            guard let data = self.data(forKey: forKey) else { return Disposables.create() }
+            if let decoder = try? JSONDecoder().decode(type, from: data) {
+                observer.onNext(decoder)
+                observer.onCompleted()
+            } else {
+                observer.onError(ObjectSavableError.unableToDecode)
+            }
+            return Disposables.create()
         }
     }
 }

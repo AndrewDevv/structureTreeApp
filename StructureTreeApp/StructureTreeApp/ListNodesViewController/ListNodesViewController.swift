@@ -7,13 +7,16 @@
 //
 
 import UIKit
+import RxSwift
+import RxDataSources
 
 class ListNodesViewController: UIViewController {
     
     // MARK: properties
     
     private let nodeTableView = UITableView()
-    private var nodeModel = NodeModel(name: "Root Node", childNodeList: [])
+    private var nodeModelVariable = Variable<[NodeModel]>([])
+    private let disposeBag = DisposeBag()
     
     // MARK: lyfecycle
 
@@ -24,7 +27,8 @@ class ListNodesViewController: UIViewController {
         setupConstraint()
         setupTableView()
         addNavBarItem()
-        getData(forKey: "Node", castTo: NodeModel.self)
+        bindViewModel()
+        getNode(forKey: "Node", castTo: NodeModel.self)
     }
 
     // MARK: setupView
@@ -37,7 +41,6 @@ class ListNodesViewController: UIViewController {
     
     private func setupTableView() {
         nodeTableView.delegate = self
-        nodeTableView.dataSource = self
         nodeTableView.register(
             ListNodesTableViewCell.self,
             forCellReuseIdentifier: String(describing: ListNodesTableViewCell.self)
@@ -70,10 +73,11 @@ class ListNodesViewController: UIViewController {
         let addButton = UIAlertAction(title: "add", style: .default) { [unowned aletController, weak self] _ in
             guard let self = self else { return }
             
-            let text = aletController.textFields?[0].text
-            self.nodeModel.childNodeList?.append(NodeModel(name: text!, childNodeList: []))
-            self.saveData(object: self.nodeModel, forKey: "Node")
-            self.nodeTableView.reloadData()
+            if let text = aletController.textFields?[0].text {
+                self.nodeModelVariable.value.append(NodeModel(name: text, childNodeList: []))
+                self.saveNode(object: self.nodeModelVariable.value, forKey: "Node")
+                self.nodeTableView.reloadData()
+            }
         }
         let cancelButton = UIAlertAction(title: "cancel", style: .cancel, handler: nil)
         
@@ -85,24 +89,12 @@ class ListNodesViewController: UIViewController {
     
     // MARK: get/set data
     
-    private func saveData(object: NodeModel, forKey: String) {
-        let userDefaults = UserDefaults.standard
-        do {
-            try userDefaults.setObject(object, forKey: forKey)
-        } catch {
-            print(error.localizedDescription)
-        }
+    private func saveNode(object: [NodeModel], forKey: String) {
+        UserDefaults.standard.setObject(object, forKey: forKey).subscribe().disposed(by: disposeBag)
     }
     
-    private func getData(forKey: String, castTo: NodeModel.Type) {
-        let userDefaults = UserDefaults.standard
-        do {
-            let data = try userDefaults.getObject(forKey: forKey, castTo: castTo.self)
-            nodeModel = data
-            print(data)
-        } catch {
-            print(error.localizedDescription)
-        }
+    private func getNode(forKey: String, castTo: NodeModel.Type) {
+        UserDefaults.standard.getObject(forKey: forKey, castTo: castTo).subscribe().disposed(by: disposeBag)
     }
     
     // MARK: Navigate
@@ -114,26 +106,23 @@ class ListNodesViewController: UIViewController {
     }
 }
 
-// MARK: UITableViewDataSource
+// MARK: RxDataSource
 
-extension ListNodesViewController: UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return nodeModel.childNodeList?.count ?? 0
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = nodeTableView.dequeueReusableCell(withIdentifier: String(describing: ListNodesTableViewCell.self)) as! ListNodesTableViewCell
-        cell.configure(name: nodeModel.childNodeList?[indexPath.row].name ?? "")
-        return cell
-    }
-    
-    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            nodeModel.childNodeList?.remove(at: indexPath.row)
-            nodeTableView.deleteRows(at: [indexPath], with: .automatic)
-            saveData(object: nodeModel, forKey: "Node")
-            nodeTableView.reloadData()
+extension ListNodesViewController {
+    func bindViewModel() {
+        
+        nodeModelVariable.asObservable().bind(to: nodeTableView.rx.items(
+            cellIdentifier: String(describing: ListNodesTableViewCell.self),
+            cellType: ListNodesTableViewCell.self
+        )) { row, node, cell in
+            cell.configure(name: node.name)
         }
+        .disposed(by: disposeBag)
+        
+        nodeTableView.rx
+            .itemDeleted
+            .subscribe(onNext: { self.nodeModelVariable.value.remove(at: $0.row) })
+            .disposed(by: disposeBag)
     }
 }
 
