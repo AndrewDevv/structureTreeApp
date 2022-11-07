@@ -10,6 +10,7 @@
 		8C6170B8ACB83048B1FF322E /* libPods-StructureTreeApp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98A1AEEAE2E86AD97E29F6F9 /* libPods-StructureTreeApp.a */; };
 		8D20543B290FD415006BEB4D /* NodeModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D20543A290FD415006BEB4D /* NodeModel.swift */; };
 		8D53B21829100B4F00F97C65 /* Extension + UserDefault.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D53B21729100B4F00F97C65 /* Extension + UserDefault.swift */; };
+		8D8C80C529112C09000822F5 /* NavigationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D8C80C429112C09000822F5 /* NavigationViewController.swift */; };
 		8DA0C37F290A9EB300EB9156 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DA0C37E290A9EB300EB9156 /* AppDelegate.swift */; };
 		8DA0C381290A9EB300EB9156 /* ListNodesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DA0C380290A9EB300EB9156 /* ListNodesViewController.swift */; };
 		8DA0C386290A9EB400EB9156 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8DA0C385290A9EB400EB9156 /* Assets.xcassets */; };
@@ -21,6 +22,7 @@
 		55E4F9ABEBC62285436E94ED /* Pods-StructureTreeApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-StructureTreeApp.debug.xcconfig"; path = "Target Support Files/Pods-StructureTreeApp/Pods-StructureTreeApp.debug.xcconfig"; sourceTree = "<group>"; };
 		8D20543A290FD415006BEB4D /* NodeModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeModel.swift; sourceTree = "<group>"; };
 		8D53B21729100B4F00F97C65 /* Extension + UserDefault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Extension + UserDefault.swift"; sourceTree = "<group>"; };
+		8D8C80C429112C09000822F5 /* NavigationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationViewController.swift; sourceTree = "<group>"; };
 		8DA0C37B290A9EB300EB9156 /* StructureTreeApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StructureTreeApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8DA0C37E290A9EB300EB9156 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		8DA0C380290A9EB300EB9156 /* ListNodesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListNodesViewController.swift; sourceTree = "<group>"; };
@@ -69,6 +71,14 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
+		8D8C80C329112BC1000822F5 /* NavigationController */ = {
+			isa = PBXGroup;
+			children = (
+				8D8C80C429112C09000822F5 /* NavigationViewController.swift */,
+			);
+			path = NavigationController;
+			sourceTree = "<group>";
+		};
 		8DA0C372290A9EB200EB9156 = {
 			isa = PBXGroup;
 			children = (
@@ -95,6 +105,7 @@
 				8DA0C390290AA06200EB9156 /* Root */,
 				8DA0C391290AA37100EB9156 /* SupportingFiles */,
 				8DA0C392290AA38A00EB9156 /* ListNodesViewController */,
+				8D8C80C329112BC1000822F5 /* NavigationController */,
 			);
 			path = StructureTreeApp;
 			sourceTree = "<group>";
@@ -238,6 +249,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8D8C80C529112C09000822F5 /* NavigationViewController.swift in Sources */,
 				8DA0C381290A9EB300EB9156 /* ListNodesViewController.swift in Sources */,
 				8D53B21829100B4F00F97C65 /* Extension + UserDefault.swift in Sources */,
 				8D20543B290FD415006BEB4D /* NodeModel.swift in Sources */,

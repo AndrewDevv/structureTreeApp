@@ -13,20 +13,18 @@ class ListNodesViewController: UIViewController {
     // MARK: properties
     
     private let nodeTableView = UITableView()
-    private var nodeModel = RootNodeModel(name: "Root Node", childNodeList: [])
+    private var nodeModel = NodeModel(name: "Root Node", childNodeList: [])
     
     // MARK: lyfecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        navigationItem.title = nodeModel.name
-        
         setupView()
         setupConstraint()
         setupTableView()
         addNavBarItem()
-        getData(forKey: "Node", castTo: RootNodeModel.self)
+        getData(forKey: "Node", castTo: NodeModel.self)
     }
 
     // MARK: setupView
@@ -38,6 +36,7 @@ class ListNodesViewController: UIViewController {
     }
     
     private func setupTableView() {
+        nodeTableView.delegate = self
         nodeTableView.dataSource = self
         nodeTableView.register(
             ListNodesTableViewCell.self,
@@ -72,7 +71,7 @@ class ListNodesViewController: UIViewController {
             guard let self = self else { return }
             
             let text = aletController.textFields?[0].text
-            self.nodeModel.childNodeList.append(ChildNode(name: text!, childs: []))
+            self.nodeModel.childNodeList?.append(NodeModel(name: text!, childNodeList: []))
             self.saveData(object: self.nodeModel, forKey: "Node")
             self.nodeTableView.reloadData()
         }
@@ -86,7 +85,7 @@ class ListNodesViewController: UIViewController {
     
     // MARK: get/set data
     
-    private func saveData(object: RootNodeModel, forKey: String) {
+    private func saveData(object: NodeModel, forKey: String) {
         let userDefaults = UserDefaults.standard
         do {
             try userDefaults.setObject(object, forKey: forKey)
@@ -95,7 +94,7 @@ class ListNodesViewController: UIViewController {
         }
     }
     
-    private func getData(forKey: String, castTo: RootNodeModel.Type) {
+    private func getData(forKey: String, castTo: NodeModel.Type) {
         let userDefaults = UserDefaults.standard
         do {
             let data = try userDefaults.getObject(forKey: forKey, castTo: castTo.self)
@@ -105,27 +104,43 @@ class ListNodesViewController: UIViewController {
             print(error.localizedDescription)
         }
     }
+    
+    // MARK: Navigate
+    
+    private func navigateOnNextNode(indexPath: IndexPath) {
+        let navVC = NavigationViewController()
+        
+        navigationController?.pushViewController(navVC, animated: false)
+    }
 }
 
 // MARK: UITableViewDataSource
 
 extension ListNodesViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return nodeModel.childNodeList.count
+        return nodeModel.childNodeList?.count ?? 0
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = nodeTableView.dequeueReusableCell(withIdentifier: String(describing: ListNodesTableViewCell.self)) as! ListNodesTableViewCell
-        cell.configure(name: nodeModel.childNodeList[indexPath.row]?.name ?? "")
+        cell.configure(name: nodeModel.childNodeList?[indexPath.row].name ?? "")
         return cell
     }
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            nodeModel.childNodeList.remove(at: indexPath.row)
+            nodeModel.childNodeList?.remove(at: indexPath.row)
             nodeTableView.deleteRows(at: [indexPath], with: .automatic)
             saveData(object: nodeModel, forKey: "Node")
             nodeTableView.reloadData()
         }
+    }
+}
+
+// MARK: UITableViewDelegate
+
+extension ListNodesViewController: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        navigateOnNextNode(indexPath: indexPath)
     }
 }
